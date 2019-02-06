@@ -38,6 +38,21 @@ class MarkdownParser(parser.Parser):
         self.next()
         return [parts.Picture(match.group(2), match.group(1))]
 
+    def __code_parser(self):
+        match = re.match('```\\s*(\\S*)', self.current)
+        if match is None:
+            return None
+        lang = match.group(1)
+        self.next()
+        code_block = []
+        while True:
+            if self.current == '```':
+                break
+            code_block.append(self.current)
+            self.next()
+        self.next()
+        return [parts.CodeBlock(code_block, lang)]
+
     def __item_parser(self):
         match = re.match("\\s*\\+\\s*(\\S+)", self.current)
         if match is None:
@@ -98,7 +113,7 @@ class MarkdownParser(parser.Parser):
         return [parts.Table(title_row, alignments, *rows, caption=caption)]
 
     def __title_parser(self) -> typing.Optional[typing.List[parts.Part]]:
-        match = re.match("(#+)\\s+(\\S+)", self.current)
+        match = re.match("(#+)\\s+(.+)", self.current)
         if match is None:
             return None
 
@@ -115,7 +130,8 @@ class MarkdownParser(parser.Parser):
             self.__table_parser,
             self.__itemize_parser,
             self.__picture_parser,
-            self.__meta_parser
+            self.__meta_parser,
+            self.__code_parser,
         ]
 
         for p in parsers:

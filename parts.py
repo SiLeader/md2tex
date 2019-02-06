@@ -34,7 +34,7 @@ class String(Part):
         return self.__string
 
     def tex(self, context: BuildContext):
-        return self.__string
+        return self.__string.replace('_', '\\_')
 
 
 class Title(String):
@@ -48,6 +48,20 @@ class Title(String):
 
     def tex(self, context: BuildContext):
         return "\\" + ("sub" * self.level) + "section{" + self.string + "}"
+
+
+class CodeBlock(Part):
+    def __init__(self, lines, language):
+        self.__content = lines
+        self.__language = language
+
+    def tex(self, context: BuildContext):
+        lines = [
+            '\\begin{verbatim}'
+        ]
+        lines.extend(self.__content)
+        lines.append('\\end{verbatim}')
+        return '\n'.join(lines)
 
 
 class Formula(String):
